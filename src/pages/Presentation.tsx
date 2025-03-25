@@ -1,4 +1,3 @@
-// src/pages/Presentation.tsx
 import React from 'react';
 
 interface Slide {

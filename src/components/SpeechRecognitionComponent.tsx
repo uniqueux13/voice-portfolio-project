@@ -1,7 +1,5 @@
-// src/components/SpeechRecognitionComponent.tsx
 import React, { useState, useEffect, useRef } from 'react';
 
-// --- ADD THESE INTERFACES ---
 interface SpeechRecognitionEvent extends Event {
     results: SpeechRecognitionResultList;
     resultIndex: number;
@@ -10,7 +8,7 @@ interface SpeechRecognitionEvent extends Event {
 interface SpeechRecognitionResultList {
     length: number;
     item(index: number): SpeechRecognitionResult;
-    [index: number]: SpeechRecognitionResult; // Make it indexable
+    [index: number]: SpeechRecognitionResult; 
 }
 
 interface SpeechRecognitionResult extends Array<SpeechRecognitionAlternative> {
@@ -26,7 +24,7 @@ interface SpeechRecognitionErrorEvent extends Event {
     error: string;
     message: string;
 }
-//This needs to be an interface, not a type, to be able to properly be extended.
+
 interface SpeechRecognition extends EventTarget {
     continuous: boolean;
     interimResults: boolean;
@@ -38,15 +36,14 @@ interface SpeechRecognition extends EventTarget {
     onresult: ((this: SpeechRecognition, ev: SpeechRecognitionEvent) => any) | null;
     onerror: ((this: SpeechRecognition, ev: SpeechRecognitionErrorEvent) => any) | null;
     onend: ((this: SpeechRecognition) => any) | null;
-    // Add other event handlers as needed (onspeechstart, onspeechend, etc.)
 }
 
 
 interface Props {
-    onResult: (result: string) => void; // Callback to pass the result to the parent
+    onResult: (result: string) => void;
 }
 
-function getSpeechRecognitionConstructor(): { new(): SpeechRecognition } | null { // Changed return type
+function getSpeechRecognitionConstructor(): { new(): SpeechRecognition } | null {
     const w = window as any;
 
     if ('SpeechRecognition' in w) {
@@ -65,14 +62,14 @@ const SpeechRecognitionComponent: React.FC<Props> = ({ onResult }) => {
     const recognitionRef = useRef<SpeechRecognition | null>(null);
 
     useEffect(() => {
-        const SpeechRecognitionConstructor = getSpeechRecognitionConstructor(); // Get the constructor
+        const SpeechRecognitionConstructor = getSpeechRecognitionConstructor(); 
 
         if (!SpeechRecognitionConstructor) {
             setError('Web Speech API is not supported in this browser.');
             return;
         }
 
-        recognitionRef.current = new SpeechRecognitionConstructor(); // Use the constructor!
+        recognitionRef.current = new SpeechRecognitionConstructor();
         recognitionRef.current.continuous = true;
         recognitionRef.current.interimResults = true;
         recognitionRef.current.lang = 'en-US';
@@ -82,7 +79,7 @@ const SpeechRecognitionComponent: React.FC<Props> = ({ onResult }) => {
         };
 
         recognitionRef.current.onresult = function (this: SpeechRecognition, event: SpeechRecognitionEvent) {
-            let finalTranscript = ''; // Accumulate the final transcript
+            let finalTranscript = ''; 
             for (let i = event.resultIndex; i < event.results.length; i++) {
                 if (event.results[i].isFinal) {
                     finalTranscript += event.results[i][0].transcript;
@@ -118,7 +115,7 @@ const SpeechRecognitionComponent: React.FC<Props> = ({ onResult }) => {
                   errorMessage += 'Language is not supported.';
                   break;
               default:
-                  errorMessage += event.error; // Fallback to the original error code
+                  errorMessage += event.error; 
           }
           setError(errorMessage);
           setIsListening(false);
@@ -135,7 +132,6 @@ const SpeechRecognitionComponent: React.FC<Props> = ({ onResult }) => {
 
 
     const startListening = () => {
-        // More consistent null checks:
         if (recognitionRef.current && !isListening) {
             setTranscript('');
             setError('');
@@ -148,7 +144,6 @@ const SpeechRecognitionComponent: React.FC<Props> = ({ onResult }) => {
     };
 
     const stopListening = () => {
-        // More consistent null checks:
         if (recognitionRef.current && isListening) {
             recognitionRef.current.stop();
         }
@@ -157,13 +152,12 @@ const SpeechRecognitionComponent: React.FC<Props> = ({ onResult }) => {
         <div>
             <button
                 onClick={isListening ? stopListening : startListening}
-                className={isListening ? 'listening' : ''} // Add the class conditionally
+                className={isListening ? 'listening' : ''} 
             >
                 {isListening ? 'Listening...' : 'Start Listening'}
             </button>
             {error && <p style={{ color: 'red' }}>{error}</p>}
             <p>Transcript: {transcript}</p>
-             {/*<p>Interim Transcript: {interimTranscript}</p> */}
         </div>
     );
 };
