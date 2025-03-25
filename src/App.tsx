@@ -1,10 +1,11 @@
-// src/App.tsx (Centralized State)
+// src/App.tsx
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 import SpeechRecognitionComponent from './components/SpeechRecognitionComponent';
 import Presentation from './pages/Presentation';
 import About from './pages/About';
 import Contact from './pages/Contact';
+import CommandModal from './components/CommandModal'; // Import
 import './App.css';
 
 interface Slide {
@@ -14,41 +15,30 @@ interface Slide {
 }
 
 const slides: Slide[] = [
-  {
-    title: 'Welcome to VUI!',
-    content: 'A minimal voice-activated user interface built with React, TypeScript, Vite, and the Web Speech API.',
-    imagePath: '/slide1.jpg',
-  },
-  {
-    title: 'Project Setup',
-    content: 'We used Vite to create a React + TypeScript project: `npm create vite@latest voice-activated-website --template react-ts`',
-    imagePath: '/slide2.png',
-  },
-  {
-    title: 'Web Speech API',
-    content: 'The Web Speech API provides speech recognition capabilities. We defined TypeScript interfaces for type safety.',
-    imagePath: '/slide3.svg',
-  },
-  {
-    title: 'Component Structure',
-    content: 'The `SpeechRecognitionComponent` handles speech recognition.  `App.tsx` manages state and routing.',
-  },
-  {
-    title: 'Command Parsing',
-    content: 'The `processCommand` function uses string matching and regular expressions to interpret voice commands.',
-    imagePath: '/slide5.jpg',
-  },
-    {
-    title: 'React Router',
-    content: 'React Router Dom enables navigation between pages',
-    imagePath: '/slide6.jpg',
-  },
+  { title: 'Welcome to VUI!', content: 'A minimal voice-activated user interface built with React, TypeScript, Vite, and the Web Speech API.', imagePath: '/slide1.jpg' },
+  { title: 'Project Setup', content: 'We used Vite to create a React + TypeScript project: `npm create vite@latest voice-activated-website --template react-ts`', imagePath: '/slide2.png' },
+  { title: 'Web Speech API', content: 'The Web Speech API provides speech recognition capabilities. We defined TypeScript interfaces for type safety.', imagePath: '/slide3.svg' },
+  { title: 'Component Structure', content: 'The `SpeechRecognitionComponent` handles speech recognition.  `App.tsx` manages state and routing.', imagePath: '' },
+  { title: 'Command Parsing', content: 'The `processCommand` function uses string matching and regular expressions to interpret voice commands.', imagePath: '/slide5.jpg' },
+  { title: 'React Router', content: 'React Router Dom enables navigation between pages', imagePath: '/slide6.jpg' },
 ];
 
-const App: React.FC = () => {  // Add React.FC here
+const commands = [
+    { command: 'next slide', description: 'Go to the next slide.' },
+    { command: 'previous slide', description: 'Go to the previous slide.' },
+    { command: 'go to slide [number]', description: 'Go to a specific slide (e.g., "go to slide 2").' },
+    { command: 'change background color to [color]', description: 'Change the background color (e.g., "change background color to blue").' },
+    { command: 'reset', description: 'Resets the background color' },
+    { command: 'go to about', description: 'Navigate to the About page.' },
+    { command: 'go to contact', description: 'Navigate to the Contact page.' },
+    { command: 'show commands', description: 'Display the available voice commands.' }, // Add this
+];
+
+const App: React.FC = () => {
     const [lastCommand, setLastCommand] = useState('');
     const [isProcessing, setIsProcessing] = useState(false);
-    const [currentSlideIndex, setCurrentSlideIndex] = useState(0); // State is now HERE
+    const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
+    const [isModalOpen, setIsModalOpen] = useState(false); // State for modal visibility
     const navigate = useNavigate();
 
     const goToNextSlide = () => {
@@ -85,9 +75,6 @@ const App: React.FC = () => {  // Add React.FC here
         }else if (lowerCaseCommand.startsWith('go to')) {
             const page = lowerCaseCommand.split('go to ')[1];
             switch (page) {
-                case 'presentation':
-                    navigate('/');
-                    break;
                 case 'about':
                     navigate('/about');
                     break;
@@ -99,7 +86,9 @@ const App: React.FC = () => {  // Add React.FC here
             }
         } else if (lowerCaseCommand.includes('reset')) {
             document.body.style.backgroundColor = 'white';
-        }  else {
+        } else if (lowerCaseCommand === 'show commands') { // Handle "show commands"
+            setIsModalOpen(true);
+        } else {
             console.log('Unknown command:', command);
         }
 
@@ -116,8 +105,16 @@ const App: React.FC = () => {  // Add React.FC here
             <SpeechRecognitionComponent onResult={processCommand} />
             <p>Last Command: {lastCommand}</p>
             {isProcessing && <p>Processing...</p>}
+
+            <button onClick={() => setIsModalOpen(true)}>Show Commands</button> {/* Button to open modal */}
+
+            <CommandModal
+                commands={commands}
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)} // Function to close the modal
+            />
+
             <Routes>
-                {/* Pass props to Presentation */}
                 <Route path="/" element={<Presentation slides={slides} currentSlideIndex={currentSlideIndex} />} />
                 <Route path="/about" element={<About />} />
                 <Route path="/contact" element={<Contact />} />

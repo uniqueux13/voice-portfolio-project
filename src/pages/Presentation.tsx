@@ -1,3 +1,4 @@
+// src/pages/Presentation.tsx
 import React from 'react';
 
 interface Slide {
@@ -26,6 +27,7 @@ const Presentation: React.FC<Props> = ({ slides, currentSlideIndex }) => {
                     <p>{slide.content}</p>
                 </div>
             ))}
+            {/* Remove the entire instructions div */}
         </div>
     );
 };
