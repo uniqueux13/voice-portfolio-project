@@ -1,3 +1,4 @@
+// src/components/SpeechRecognitionComponent.tsx
 import React, { useState, useEffect, useRef } from 'react';
 
 // --- ADD THESE INTERFACES ---
@@ -81,14 +82,14 @@ const SpeechRecognitionComponent: React.FC<Props> = ({ onResult }) => {
         };
 
         recognitionRef.current.onresult = function (this: SpeechRecognition, event: SpeechRecognitionEvent) {
-            let interimTranscript = '';
+            let finalTranscript = ''; // Accumulate the final transcript
             for (let i = event.resultIndex; i < event.results.length; i++) {
                 if (event.results[i].isFinal) {
-                    setTranscript((prevTranscript) => prevTranscript + event.results[i][0].transcript);
-                    onResult(event.results[i][0].transcript);
-                } else {
-                    interimTranscript += event.results[i][0].transcript;
+                    finalTranscript += event.results[i][0].transcript;
                 }
+            }
+            if (finalTranscript) { // Only call onResult if there's a final transcript
+                onResult(finalTranscript.trim()); // Pass the final result to parent
             }
         };
 
